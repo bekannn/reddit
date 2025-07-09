@@ -188,53 +188,8 @@ CREATE TABLE CommentReports (
 );
 
 
--- 18. Chat
-DROP TABLE IF EXISTS Chats CASCADE;
-CREATE TABLE Chats (
-    chat_id SERIAL PRIMARY KEY,
-    chat_name VARCHAR,
-    is_group BOOLEAN DEFAULT FALSE,
-    is_community BOOLEAN DEFAULT FALSE,
-    linked_subreddit_id INT REFERENCES Subreddits(subreddit_id),
-    created_by INT REFERENCES Users(user_id),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
--- 19. Chat Participants
-DROP TABLE IF EXISTS ChatParticipants CASCADE;
-CREATE TABLE ChatParticipants (
-    chat_id INT REFERENCES Chats(chat_id) ON DELETE CASCADE,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_admin BOOLEAN DEFAULT FALSE,
-    is_muted BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (chat_id, user_id)
-);
-
--- 20. Messages
-DROP TABLE IF EXISTS Messages CASCADE;
-CREATE TABLE Messages (
-    message_id SERIAL PRIMARY KEY,
-    chat_id INT NOT NULL REFERENCES Chats(chat_id) ON DELETE CASCADE,
-    sender_id INT NOT NULL REFERENCES Users(user_id),
-    content TEXT NOT NULL,
-    has_media BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN DEFAULT FALSE
-);
-
-
--- 21. Message Media
-DROP TABLE IF EXISTS MessageMedia CASCADE;
-CREATE TABLE MessageMedia (
-    media_id SERIAL PRIMARY KEY,
-    message_id INT REFERENCES Messages(message_id),
-    media_type VARCHAR,
-    url VARCHAR NOT NULL,
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 22. Subreddit Topics
+-- 18. Subreddit Topics
 DROP TABLE IF EXISTS SubredditTopics CASCADE;
 CREATE TABLE SubredditTopics (
     topic_id SERIAL PRIMARY KEY,
@@ -244,12 +199,44 @@ CREATE TABLE SubredditTopics (
     created_by INT REFERENCES Admins(user_id)
 );
 
--- 23. Subreddit Topic Link
+-- 19. Subreddit Topic Link
 DROP TABLE IF EXISTS SubredditTopicLinks CASCADE;
 CREATE TABLE SubredditTopicLinks (
     subreddit_id INT REFERENCES Subreddits(subreddit_id) ON DELETE CASCADE,
     topic_id INT REFERENCES SubredditTopics(topic_id) ON DELETE CASCADE,
     PRIMARY KEY (subreddit_id, topic_id)
+);
+
+-- 20. Restriction Table
+DROP TABLE IF EXISTS Restriction CASCADE;
+
+CREATE TABLE Restriction (
+  restriction_id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+  admin_id INT REFERENCES Admins(user_id) ON DELETE SET NULL,
+  reason TEXT NOT NULL,
+  ban_date TIMESTAMP NOT NULL,
+  duration_days INT DEFAULT NULL,  -- NULL = permanent
+  is_active BOOLEAN DEFAULT TRUE,
+
+
+  type TEXT GENERATED ALWAYS AS (
+    CASE
+      WHEN duration_days IS NULL THEN 'ban'
+      ELSE 'suspension'
+    END
+  ) STORED
+);
+
+
+-- 21. Announcements Table
+CREATE TABLE Announcements (
+  announcement_id SERIAL PRIMARY KEY,
+  admin_id INT REFERENCES Admins(user_id) ON DELETE SET NULL,
+  title VARCHAR(255) NOT NULL,
+  body TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT TRUE
 );
 
 

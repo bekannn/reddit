@@ -459,3 +459,11 @@ insert into Memberships (subreddit_id, user_id, joined_at) values (3, 31, '2025-
 insert into Memberships (subreddit_id, user_id, joined_at) values (16, 29, '2025-06-12 15:07:42');
 
 
+
+-- BANS
+INSERT INTO Restriction (user_id, admin_id, reason, ban_date, duration_days, is_active)
+VALUES
+(7, 49, 'Hate speech in comments', '2025-06-10 08:00:00', NULL, TRUE), -- Permanent ban
+(21, 49, 'Repeated rule violations', '2025-05-01 09:20:00', 7, FALSE),-- Expired
+(33, 50, 'Impersonating moderators', '2025-04-15 11:10:00', NULL, TRUE);
+
