@@ -1,10 +1,8 @@
-
 CREATE OR REPLACE FUNCTION get_post_details(p_post_id INT)
 RETURNS TABLE (
     post_id INT,
     title VARCHAR,
     content TEXT,
-    post_type post_type,
     created_at TIMESTAMP,
     author_username VARCHAR,
     subreddit_name VARCHAR,
@@ -20,7 +18,6 @@ SELECT
   p.post_id,
   p.title,
   p.content,
-  p.post_type,
   p.created_at,
   u.username AS author_username,
   s.name AS subreddit_name,

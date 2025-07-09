@@ -67,7 +67,7 @@ BEGIN
         -- Previous vote exists
         IF c_vote_value = old_vote THEN
             -- delete vote
-            DELETE FROM CommentVotes WHERE user_id = c_user_id AND c_comment_id = c_comment_id;
+            DELETE FROM CommentVotes WHERE user_id = c_user_id AND comment_id = c_comment_id;
             RETURN;
         ELSE
             -- Change vote from old_vote to p_vote_value

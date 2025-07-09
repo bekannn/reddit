@@ -31,15 +31,14 @@ SELECT
 FROM posts p
 JOIN users u ON p.user_id = u.user_id
 JOIN subreddits s ON p.subreddit_id = s.subreddit_id
-JOIN memberships m ON m.subreddit_id = s.subreddit_id
+JOIN memberships m ON m.subreddit_id = s.subreddit_id AND m.user_id = p_user_id
 LEFT JOIN postmedia pm ON pm.post_id = p.post_id
-WHERE m.user_id = p_user_id
-  AND p.is_deleted = FALSE
+WHERE p.is_deleted = FALSE
 ORDER BY p.created_at DESC, (p.upvote_count - p.downvote_count) DESC
 LIMIT 10;
 $$;
 
-
+DROP FUNCTION get_popular_feed();
 --- POPULAR page
 CREATE OR REPLACE FUNCTION get_popular_feed()
 RETURNS TABLE (
@@ -52,7 +51,10 @@ RETURNS TABLE (
     downvote_count INT,
     comment_count INT,
     username VARCHAR,
-    subreddit_name VARCHAR
+    subreddit_name VARCHAR,
+    media_type VARCHAR,
+    media_url VARCHAR,
+    score INT
 )
 LANGUAGE SQL AS
 $$
@@ -66,12 +68,16 @@ SELECT
     p.downvote_count,
     p.comment_count,
     u.username,
-    s.name AS subreddit_name
+    s.name AS subreddit_name,
+    pm.media_type,
+    pm.url AS media_url,
+    (p.upvote_count - p.downvote_count) AS score
 FROM posts p
 JOIN users u ON p.user_id = u.user_id
 JOIN subreddits s ON p.subreddit_id = s.subreddit_id
+LEFT JOIN postmedia pm ON pm.post_id = p.post_id
 WHERE p.is_deleted = FALSE AND s.visibility != 'private'
-ORDER BY (p.upvote_count - p.downvote_count) DESC, p.comment_count DESC
+ORDER BY score DESC, p.comment_count DESC
 LIMIT 30;
 $$;
 
@@ -155,9 +161,8 @@ ORDER BY (p.upvote_count - p.downvote_count) DESC, p.comment_count DESC
 LIMIT 20;
 $$;
 
-
 --- LATEST page
-CREATE OR REPLACE FUNCTION get_latest_posts()
+CREATE OR REPLACE FUNCTION get_latest_posts(p_user_id INT)
 RETURNS TABLE (
     post_id INT,
     title VARCHAR,
@@ -190,8 +195,10 @@ SELECT
 FROM posts p
 JOIN subreddits s ON p.subreddit_id = s.subreddit_id
 JOIN users u ON p.user_id = u.user_id
+JOIN memberships m ON m.subreddit_id = s.subreddit_id
 LEFT JOIN postmedia pm ON pm.post_id = p.post_id
-WHERE p.is_deleted = FALSE
+WHERE m.user_id = p_user_id
+  AND p.is_deleted = FALSE
 ORDER BY p.created_at DESC
 LIMIT 20;
 $$;

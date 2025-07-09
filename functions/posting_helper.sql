@@ -32,7 +32,7 @@ LANGUAGE SQL AS
 $$
 SELECT tag_id, tag_text, tag_css_class, created_at
 FROM Tags
-WHERE subreddit_id = p_subreddit_id AND tag_type = 'post'
+WHERE subreddit_id = p_subreddit_id
 ORDER BY created_at;
 $$;
 
