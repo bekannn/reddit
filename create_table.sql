@@ -35,8 +35,8 @@ CREATE TYPE post_type AS ENUM ('text', 'image', 'video', 'link');
 DROP TABLE IF EXISTS Posts CASCADE;
 CREATE TABLE Posts (
   post_id SERIAL PRIMARY KEY,
-  subreddit_id INT REFERENCES Subreddits(subreddit_id) ON DELETE CASCADE,
-  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+  subreddit_id INT NOT NULL REFERENCES Subreddits(subreddit_id) ON DELETE CASCADE,
+  user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
   title VARCHAR(255) NOT NULL,
   content TEXT,
   post_type post_type,
@@ -55,7 +55,7 @@ CREATE TABLE Subreddits (
   subreddit_id SERIAL PRIMARY KEY,
   name VARCHAR(100) UNIQUE NOT NULL,
   description TEXT NOT NULL,
-  created_by INT REFERENCES Users(user_id) ON DELETE CASCADE,
+  created_by INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
   visibility subreddit_visibility,
   allow_url BOOLEAN DEFAULT TRUE,
   allow_image BOOLEAN DEFAULT TRUE,
@@ -72,8 +72,8 @@ CREATE TABLE Subreddits (
 DROP TABLE IF EXISTS Comments CASCADE;
 CREATE TABLE Comments (
   comment_id SERIAL PRIMARY KEY,
-  post_id INT REFERENCES Posts(post_id) ON DELETE CASCADE,
-  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
+  post_id INT NOT NULL REFERENCES Posts(post_id) ON DELETE CASCADE,
+  user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
   parent_comment_id INT REFERENCES Comments(comment_id),
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -89,7 +89,7 @@ DROP TABLE IF EXISTS PostVotes CASCADE;
 CREATE TABLE PostVotes (
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
   post_id INT REFERENCES Posts(post_id) ON DELETE CASCADE,
-  vote_value INT CHECK (vote_value IN (-1, 1)),
+  vote_value INT NOT NULL CHECK (vote_value IN (-1, 1)),
   PRIMARY KEY (user_id, post_id)
 );
 
@@ -98,7 +98,7 @@ DROP TABLE IF EXISTS CommentVotes CASCADE;
 CREATE TABLE CommentVotes (
   user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
   comment_id INT REFERENCES Comments(comment_id) ON DELETE CASCADE,
-  vote_value INT CHECK (vote_value IN (-1, 1)),
+  vote_value INT NOT NULL CHECK (vote_value IN (-1, 1)),
   PRIMARY KEY (user_id, comment_id)
 );
 
@@ -116,7 +116,7 @@ CREATE TABLE Memberships (
 DROP TABLE IF EXISTS PostMedia CASCADE;
 CREATE TABLE PostMedia (
     media_id SERIAL PRIMARY KEY,
-    post_id INT REFERENCES Posts(post_id) ON DELETE CASCADE,
+    post_id INT NOT NULL REFERENCES Posts(post_id) ON DELETE CASCADE,
     media_type VARCHAR NOT NULL,
     url VARCHAR NOT NULL
 );
@@ -126,8 +126,8 @@ DROP TABLE IF EXISTS Tags CASCADE;
 CREATE TYPE tag_type_enum AS ENUM ('post', 'user');
 CREATE TABLE Tags (
     tag_id SERIAL PRIMARY KEY,
-    subreddit_id INT REFERENCES Subreddits(subreddit_id) ON DELETE CASCADE,
-    tag_text VARCHAR NOT NULL,
+    subreddit_id INT NOT NULL REFERENCES Subreddits(subreddit_id) ON DELETE CASCADE,
+    tag_text VARCHAR(15) NOT NULL,
     tag_css_class VARCHAR,
     tag_type tag_type_enum,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -155,7 +155,7 @@ CREATE TABLE Moderators (
 DROP TABLE IF EXISTS ReportReasons CASCADE;
 CREATE TABLE ReportReasons (
   reason_id SERIAL PRIMARY KEY,
-  reason_text VARCHAR NOT NULL
+  reason_text VARCHAR(50) NOT NULL
 );
 
 -- Report Status Enum
@@ -165,8 +165,8 @@ CREATE TYPE report_status_enum AS ENUM ('pending', 'resolved', 'rejected');
 DROP TABLE IF EXISTS Reports CASCADE;
 CREATE TABLE Reports (
   report_id SERIAL PRIMARY KEY,
-  reporter_id INT REFERENCES Users(user_id),
-  reason_id INT REFERENCES ReportReasons(reason_id),
+  reporter_id INT NOT NULL REFERENCES Users(user_id),
+  reason_id INT NOT NULL REFERENCES ReportReasons(reason_id),
   is_self BOOLEAN,
   created_at TIMESTAMP DEFAULT NOW(),
   status report_status_enum DEFAULT 'pending'
@@ -212,8 +212,8 @@ DROP TABLE IF EXISTS Restriction CASCADE;
 
 CREATE TABLE Restriction (
   restriction_id SERIAL PRIMARY KEY,
-  user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-  admin_id INT REFERENCES Admins(user_id) ON DELETE SET NULL,
+  user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
+  admin_id INT NOT NULL REFERENCES Admins(user_id) ON DELETE SET NULL,
   reason TEXT NOT NULL,
   ban_date TIMESTAMP NOT NULL,
   duration_days INT DEFAULT NULL,  -- NULL = permanent

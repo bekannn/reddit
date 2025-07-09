@@ -268,34 +268,6 @@ insert into CommentReports (report_id, comment_id) values (8, 7);
 insert into CommentReports (report_id, comment_id) values (9, 1);
 insert into CommentReports (report_id, comment_id) values (10, 14);
 
--- CHATS
-INSERT INTO Chats (chat_name, is_group, is_community, linked_subreddit_id, created_by, created_at)
-SELECT 'Chat sample', TRUE, FALSE, s.subreddit_id, u.user_id, CURRENT_TIMESTAMP
-FROM Subreddits s, Users u
-WHERE random() < 0.3
-LIMIT 3;
-
--- CHATPARTICIPANTS
-INSERT INTO ChatParticipants (chat_id, user_id, joined_at, is_admin, is_muted)
-SELECT ch.chat_id, u.user_id, CURRENT_TIMESTAMP, FALSE, FALSE
-FROM Chats ch, Users u
-WHERE random() < 0.3
-LIMIT 10;
-
--- MESSAGES
-INSERT INTO Messages (chat_id, sender_id, content, has_media, created_at, is_deleted)
-SELECT ch.chat_id, u.user_id, 'Message content', FALSE, CURRENT_TIMESTAMP, FALSE
-FROM Chats ch, Users u
-WHERE random() < 0.3
-LIMIT 8;
-
--- MESSAGEMEDIA
-INSERT INTO MessageMedia (message_id, media_type, url, uploaded_at)
-SELECT m.message_id, 'image', 'https://example.com/media/message_media.jpg', CURRENT_TIMESTAMP
-FROM Messages m
-WHERE random() < 0.3
-LIMIT 2;
-
 
 -- SUBREDDITTOPICS
 insert into SubredditTopics (name, description, created_by, created_at) values ('heuristic', 'dolor sit amet', 50, '2025-01-24 19:53:10');
