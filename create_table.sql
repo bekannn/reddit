@@ -230,13 +230,13 @@ CREATE TABLE Restriction (
 
 
 -- 21. Announcements Table
+DROP TABLE IF EXISTS Announcements CASCADE;
 CREATE TABLE Announcements (
   announcement_id SERIAL PRIMARY KEY,
   admin_id INT REFERENCES Admins(user_id) ON DELETE SET NULL,
   title VARCHAR(255) NOT NULL,
   body TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  is_active BOOLEAN DEFAULT TRUE
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 
